@@ -1,0 +1,97 @@
+github.com/siebenmann/smtpd
+------------------------------------------------------------------------------
+This notes are actual for 5dd2126598fd93493ed3df594af142464ade83f9
+
+1.  [ ] More efficient setup is to use a hash table here
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L98
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L168
+    But because of SMTP inconsistency there is a problem.
+    Command could be terminated with ' ' or ':'
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L185
+2.  [X] Author uses the term CR-NL, and RFC 2821 uses term CRLF
+    probably author should be consistent with RFC
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L144
+3.  [X] Uncommon way to return an error in go(it is inside ParsedLine as string)
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L145
+    But thats probably ok because we dealing with userlevel errors here.
+4.  [ ] I like how argument parsing performed
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L195
+5.  [X] Do we have a bug here? Probably a CRLF issue.
+    Can not find a test for this.
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L202
+    No, there is no bug, we have trimmed the right side of the string.
+6.  [X] Error messages in tests are hardcoded
+    https://github.com/siebenmann/smtpd/blob/master/smtpd_test.go#L91
+7.  [X] There is inconsistency with 'Args' and 'Params'
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L216
+    It is ok, I have misunderstood em. But I still don't like this part
+    of code.
+8.  [X] Number here is a bit strange, why it is 3?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L220
+    https://tools.ietf.org/rfc/rfc4954.txt also AUTH is conflicting
+    with esmtp params, it is the only using this style of parsing.
+    Well, 3 is just a variants of arguments count.
+9.  [X] Declarations are messed a littlebit, types should go first
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L290
+    It should be splited into more files, leaving this for now.
+10. [X] Good practices for state definition
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L309
+    Already good.
+11. [X] Whats the strange comment about Conn in Limits?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L323
+12. [X] Limits is not match the RFC limits(timeouts)
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L341
+    https://tools.ietf.org/pdf/rfc2821.pdf#130
+13. [X] This is not good, probably we could pass a limits to a constructor
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L323
+    Not required, just specify Limits in Config for Conn.
+14. [X] TLSOn could be dynamic and should not be exported.
+    But Conn could have a method that returns it's state.
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L407
+    It is ok, we are happy with exported flag, just do not change it.
+15. [X] Life is bad, lets get rid of this crude(replyMore)
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L487
+    Used in:
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L586
+    Just renamed it to replyMaybe, this wrapper around reply is very useful
+    for clients which abort the connection while we sending our multiline reply.
+16. [X] What is replyMulti exactly for?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L493
+    Ok, with more comprehensive codebase knowledge I have figured it out, see comments.
+17. [X] Why do the separate function to simply format the string?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L508
+    It is just for logging, will refactor it when #29.
+18. [X] Line 516 states «This is much bigger than the RFC requires», so
+    ok, but why? We probably want this configurable for «special» cases.
+    default value should respect the RFC. Also we probably don't want
+    to set this value every time readCmd invoked.
+    Forcing the limit from config, default limit is RFC compatible.
+19. [X] readData function is implemented well with textproto reusage
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L536
+20. [X] Auth input limit is ok with RFC
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L548
+    https://tools.ietf.org/pdf/rfc4954.pdf#5
+21. [X] Thats an ugly if, probably there should be some leveling to response
+    in one place
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L574
+    No way, it should know where to stop.
+22. [X] Replies should be a constants
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L614
+    Refactored to constants, but it still diverged. Need more comprehensive refactoring.
+23. [X] What is oldstate and sRcpt and why do we need this?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L622
+    Aah, ok, thats because of DATA semantics. We could not relay on it,
+    it could be called multiple times. Here SMTP sucks the whole bunch.
+24. [X] AcceptMsg looks strange, why separate function to do this things?
+    https://github.com/siebenmann/smtpd/blob/master/smtpd.go#L636
+    Aah, ok, as other function it is just a specific reply group
+25. [ ] There is alot, we need a minimal frontend to start SMTP server
+    https://github.com/siebenmann/smtpd/blob/master/cmd/sinksmtp.go#L820
+26. [ ] There are no tests for most of the errors described in errors.go.
+27. [ ] There are a lot of hardcoded values in tests(noticed it after resolving 6),
+    you should clean em up.
+28. [ ] Tests should use asserts, not the sily if Fatalf.
+29. [ ] Allow external logging component to be attached.
+30. [ ] Check for a test on too long SMTP commands.
+31. [ ] Fight divergence in status codes(need one place to store them all).
+32. [ ] Message data should be a reader to minimize memory consumption!

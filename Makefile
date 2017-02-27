@@ -12,11 +12,6 @@ $(NAME):
 	govendor remove +u
 	govendor add +e
 	govendor sync
-	mkdir -p build
-	go build -a -ldflags "$(LDFLAGS)" -v \
-		-o build/$(NAME)             \
-		$(PACKAGE)/$(NAME)
-
 
 test: tools
 	go test -v $(PACKAGE)/...

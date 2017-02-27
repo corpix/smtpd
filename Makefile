@@ -13,6 +13,8 @@ $(NAME):
 	govendor add +e
 	govendor sync
 
+build: $(NAME)
+
 test: tools
 	go test -v $(PACKAGE)/...
 

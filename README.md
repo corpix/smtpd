@@ -1,5 +1,7 @@
 smtpd
---------------------
+-----
+
+[![Build Status](https://travis-ci.org/corpix/smtpd.svg?branch=master)](https://travis-ci.org/corpix/smtpd)
 
 This package is trying to implement RFC-compatible SMTP server fo go.
 

@@ -134,3 +134,7 @@ INFO[0004] Message body: This is a test mailing
 ## Credits
 
 * [@siebenmann](https://github.com/siebenmann/smtpd) for awesome work on SMTPD package this packaged is based on.
+
+## License
+
+MIT

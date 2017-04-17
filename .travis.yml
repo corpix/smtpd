@@ -8,6 +8,6 @@ go:
 
 install:
   - make
-  - go get ./...
+  - go get -t ./...
 
 script: make test

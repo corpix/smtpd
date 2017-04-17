@@ -1,3 +1,5 @@
+package smtpd
+
 // The MIT License (MIT)
 
 // Copyright © 2017 Dmitry Moskowski
@@ -19,9 +21,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-package smtpd
 
 //
+
 // This package is a fork of the github.com/siebenmann/smtpd@5dd2126
 // It is intended to be more clean and simple replacement for the original package.
 //

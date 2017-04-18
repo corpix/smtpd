@@ -10,4 +10,4 @@ install:
   - make
   - go get -t ./...
 
-script: make test
+script: go test -v

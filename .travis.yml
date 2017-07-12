@@ -6,8 +6,4 @@ go:
   - 1.8
   - master
 
-install:
-  - make
-  - go get -t ./...
-
 script: go test -v

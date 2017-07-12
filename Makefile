@@ -1,57 +1,48 @@
-.DEFAULT_GOAL  = all
+.DEFAULT_GOAL = all
 
-build_id      := 0x$(shell dd if=/dev/urandom bs=40 count=1 2> /dev/null | sha1sum | awk '{print $$1}')
+numcpus  := $(shell cat /proc/cpuinfo | grep '^processor\s*:' | wc -l)
+version  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
-NAME           = smtpd
-PACKAGE        = github.com/corpix/$(NAME)
-NUMCPUS        = $(shell cat /proc/cpuinfo | grep '^processor\s*:' | wc -l)
-VERSION        = $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
-LDFLAGS        = -X $(PACKAGE)/cli.version=$(VERSION) \
-                 -B $(build_id)
-
+name     := smtpd
+package  := github.com/corpix/$(name)
 
 .PHONY: all
-all: tools
+all:: dependencies
 
-.PHONY: $(NAME)
-$(NAME):
-	govendor remove +u
-	govendor add +e
-	govendor sync
-	mkdir -p build
-	@echo "Build id: $(build_id)"
-	go build -a -ldflags "$(LDFLAGS)" -v \
-		-o build/$(NAME)             \
-		$(PACKAGE)/$(NAME)
+.PHONY: tools
+tools::
+	@if [ ! -e "$(GOPATH)"/bin/glide ]; then go get github.com/Masterminds/glide; fi
+	@if [ ! -e "$(GOPATH)"/bin/godef ]; then go get github.com/rogpeppe/godef; fi
+	@if [ ! -e "$(GOPATH)"/bin/gocode ]; then go get github.com/nsf/gocode; fi
+	@if [ ! -e "$(GOPATH)"/bin/gometalinter ]; then go get github.com/alecthomas/gometalinter && gometalinter --install; fi
+	@if [ ! -e "$(GOPATH)"/src/github.com/stretchr/testify/assert ]; then go get github.com/stretchr/testify/assert; fi
 
-.PHONY: build
-build: $(NAME)
+.PHONY: dependencies
+dependencies:: tools
+	glide install
 
+.PHONY: clean
+clean:: tools
+	glide cache-clear
 
 .PHONY: test
-test: tools
-	go test -v ./...
+test:: dependencies
+	go test -v \
+           $(shell glide novendor)
 
 .PHONY: bench
-bench: tools
-	go test -bench=. -v ./...
+bench:: dependencies
+	go test        \
+           -bench=. -v \
+           $(shell glide novendor)
 
 .PHONY: lint
-lint: tools
-	go vet ./...
+lint:: dependencies
+	go vet $(shell glide novendor)
 	gometalinter                     \
 		--deadline=5m            \
-		--concurrency=$(NUMCPUS) \
-		--exclude="(^|/)vendor/" \
-		./...
+		--concurrency=$(numcpus) \
+		$(shell glide novendor)
 
 .PHONY: check
-check: lint test
-
-.PHON: tools
-tools:
-	if [ ! -e "$(GOPATH)"/src/"github.com/kardianos/govendor" ]; then go get github.com/kardianos/govendor; fi
-	if [ ! -e "$(GOPATH)"/src/"github.com/rogpeppe/godef" ]; then go get github.com/rogpeppe/godef; fi
-	if [ ! -e "$(GOPATH)"/src/"github.com/nsf/gocode" ]; then go get github.com/nsf/gocode; fi
-	if [ ! -e "$(GOPATH)"/src/"github.com/stretchr/testify/assert" ]; then go get github.com/stretchr/testify/assert; fi
-	if [ ! -e "$(GOPATH)"/src/"github.com/alecthomas/gometalinter" ]; then go get github.com/alecthomas/gometalinter && gometalinter --install; fi
+check:: lint test

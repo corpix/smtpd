@@ -1,0 +1,14 @@
+hash: 53772bccebbcb1e40066eb214eb8ac51dabe6f0bce9071e9d4e593bb08ea0369
+updated: 2017-07-12T20:41:46.766627998Z
+imports:
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/Sirupsen/logrus
+  version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
+- name: golang.org/x/sys
+  version: abf9c25f54453410d0c6668e519582a9e1115027
+  subpackages:
+  - unix
+testImports: []

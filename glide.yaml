@@ -1,0 +1,8 @@
+package: github.com/corpix/smtpd
+import:
+- package: github.com/Sirupsen/logrus
+  version: v1.0.1
+- package: github.com/davecgh/go-spew
+  version: v1.1.0
+  subpackages:
+  - spew
